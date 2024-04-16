@@ -14,7 +14,20 @@ config :logger, level: :info
 
 config :libcluster,
   topologies: [
-    gossip: [
-      strategy: Cluster.Strategy.Gossip
+    ping: [
+      strategy: Elixir.Cluster.Strategy.Kubernetes.DNS,
+      config: [
+        service: "ping-svc",
+        application_name: "ping",
+        polling_interval: 10_000
+      ]
+    ],
+    pong: [
+      strategy: Elixir.Cluster.Strategy.Kubernetes.DNS,
+      config: [
+        service: "pong-svc",
+        application_name: "pong",
+        polling_interval: 10_000
+      ]
     ]
   ]
