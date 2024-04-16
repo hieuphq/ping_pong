@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pong
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: pong
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: pong
+    spec:
+      containers:
+        - name: pong
+          image: pong:local
+          imagePullPolicy: Never
+          ports:
+            - name: http
+              containerPort: 4000
+          resources:
+            requests:
+              memory: "100Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "200m"
+          env:
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: RELEASE_COOKIE
+              value: "cookie"
+            - name: SECRET_KEY_BASE
+              value: "pNMpzt6CBfl1P5tuTBI/UtHa23JRUjJht4NknrR1D5WYOuvCOQAjf+f4DC9XBjne"

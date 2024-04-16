@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ping
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: ping
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: ping
+    spec:
+      containers:
+        - name: ping
+          image: ping:local
+          imagePullPolicy: Never
+          ports:
+            - name: http
+              containerPort: 4000
+          resources:
+            requests:
+              memory: "100Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "200m"
+          env:
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: RELEASE_COOKIE
+              value: "cookie"
+            - name: SECRET_KEY_BASE
+              value: "c8OwYynFUVomS+cax0jsK+8WZlWx7mEEhZG/z/qusB/8fUnVfcKVijYWwM3Md6Yj"

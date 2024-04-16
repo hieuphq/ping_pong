@@ -7,7 +7,12 @@ defmodule Pong.Application do
 
   @impl true
   def start(_type, _args) do
+    topologies = Application.get_env(:libcluster, :topologies) || []
+
+    IO.inspect("pong topoligies #{length(topologies)}")
+
     children = [
+      {Cluster.Supervisor, [topologies, [name: Pong.ClusterSupervisor]]},
       PongWeb.Telemetry,
       {DNSCluster, query: Application.get_env(:pong, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: Pong.PubSub},
@@ -16,7 +21,13 @@ defmodule Pong.Application do
       # Start a worker by calling: Pong.Worker.start_link(arg)
       # {Pong.Worker, arg},
       # Start to serve requests, typically the last entry
-      PongWeb.Endpoint
+      PongWeb.Endpoint,
+      Supervisor.child_spec(
+        {Phoenix.PubSub, name: :pingpong_pubsub, adapter: Phoenix.PubSub.PG2},
+        id: :pingpong_pubsub
+      ),
+      Util.Observer,
+      Pong.Listener
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

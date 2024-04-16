@@ -54,3 +54,10 @@ config :phoenix, :plug_init_mode, :runtime
 
 # Disable swoosh api client as it is only required for production adapters.
 config :swoosh, :api_client, false
+
+config :libcluster,
+  topologies: [
+    local_epmd_example: [
+      strategy: Cluster.Strategy.Gossip
+    ]
+  ]

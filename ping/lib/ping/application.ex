@@ -7,7 +7,10 @@ defmodule Ping.Application do
 
   @impl true
   def start(_type, _args) do
+    topologies = Application.get_env(:libcluster, :topologies) || []
+
     children = [
+      {Cluster.Supervisor, [topologies, [name: Ping.ClusterSupervisor]]},
       PingWeb.Telemetry,
       {DNSCluster, query: Application.get_env(:ping, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: Ping.PubSub},
@@ -16,7 +19,13 @@ defmodule Ping.Application do
       # Start a worker by calling: Ping.Worker.start_link(arg)
       # {Ping.Worker, arg},
       # Start to serve requests, typically the last entry
-      PingWeb.Endpoint
+      PingWeb.Endpoint,
+      Util.Observer,
+      Supervisor.child_spec(
+        {Phoenix.PubSub, name: :pingpong_pubsub, adapter: Phoenix.PubSub.PG2},
+        id: :pingpong_pubsub
+      ),
+      Ping.Sender
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
